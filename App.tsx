@@ -47,5 +47,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  todoText: {},
+  todoText: {
+    width: '90%',
+    marginBottom: 16,
+    marginTop: 16,
+    borderBottomWidth: 2,
+    fontSize: 18,
+    justifyContent: 'center',
+  },
 })
