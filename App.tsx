@@ -1,13 +1,24 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react'
+import { StyleSheet, Text, View, SafeAreaView, TextInput } from 'react-native'
 
-export default class App extends React.Component {
+// Declare because of using typescript.
+interface IState {
+  todoText: string
+  items: string[]
+}
+
+export default class App extends React.Component<{}, IState> {
+  state = {
+    todoText: '',
+    items: [],
+  }
+
   render() {
     return (
-      <View style={styles.container}>
-        <Text>Open up App.js to start working on your app!</Text>
-      </View>
-    );
+      <SafeAreaView style={styles.container}>
+        <TextInput value={this.state.todoText} onChangeText={} />
+      </SafeAreaView>
+    )
   }
 }
 
@@ -18,4 +29,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-});
+})
