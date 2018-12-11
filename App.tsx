@@ -38,8 +38,8 @@ export default class App extends React.Component<{}, IState> {
   // How each cell looks like
   _listItemRender = (item: string) => {
     return (
-      <View>
-        <Text>{item}</Text>
+      <View style={styles.listItem}>
+        <Text style={styles.itemText}>{item}</Text>
       </View>
     )
   }
@@ -55,6 +55,7 @@ export default class App extends React.Component<{}, IState> {
         {/* FlatList */}
         {/* at least 2 props(data source, render) */}
         <FlatList
+          style={styles.list}
           data={this.state.items}
           // Object deconstruction -> just want 1 item
           // {item}
@@ -86,5 +87,22 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     fontSize: 18,
     justifyContent: 'center',
+  },
+  list: {
+    width: '100%',
+    flex: 1,
+  },
+  listItem: {
+    backgroundColor: '#4286f4',
+    height: 50,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomWidth: 1,
+    borderColor: 'white',
+  },
+  itemText: {
+    color: 'white',
+    fontSize: 18,
   },
 })
