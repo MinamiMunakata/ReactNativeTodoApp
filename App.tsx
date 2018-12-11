@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   TextInput,
   Button,
+  FlatList,
 } from 'react-native'
 
 // Declare because of using typescript.
@@ -22,7 +23,25 @@ export default class App extends React.Component<{}, IState> {
 
   _insert = () => {
     // insert item
-    console.log('Clicked!')
+    // Pass new array to add element
+    // Otherwise it doesn't render even the size is changed
+    // because it is still a same reference...
+    // this.state.items.push(this.state.todoText)
+    // this.setState({ items: this.state.items})
+    // Copy and refere diffent array
+    this.setState({
+      todoText: '',
+      items: [...this.state.items, this.state.todoText],
+    })
+  }
+
+  // How each cell looks like
+  _listItemRender = (item: string) => {
+    return (
+      <View>
+        <Text>{item}</Text>
+      </View>
+    )
   }
   render() {
     return (
@@ -34,6 +53,19 @@ export default class App extends React.Component<{}, IState> {
         />
         {/* => this.setState({ todoText: todoText}) */}
         {/* FlatList */}
+        {/* at least 2 props(data source, render) */}
+        <FlatList
+          data={this.state.items}
+          // Object deconstruction -> just want 1 item
+          // {item}
+          renderItem={({ item }) => this._listItemRender(item)}
+          // Give keys to distinguish each node which the flatList holds.
+          // Keys should be a string type.
+          keyExtractor={
+            (item, index) => index.toString()
+            /* If the item is an object which has 'id' field, you can set 'id' as a key. */
+          } /* item.id.toString() */
+        />
         <Button title={'Add Todo'} onPress={this._insert} />
       </SafeAreaView>
     )
