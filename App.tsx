@@ -9,7 +9,16 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native'
-import { SecureStore } from 'expo'
+import { SecureStore, SQLite } from 'expo'
+
+const db = SQLite.openDatabase('todo.db')
+
+/**
+ * 1) Save - insert
+ *          - delete
+ *
+ * 2) get
+ */
 
 // Declare because of using typescript.
 interface IState {
@@ -23,26 +32,63 @@ export default class App extends React.Component<{}, IState> {
     items: [],
   }
 
-  _insert = () => {
-    // insert item
-    // Pass new array to add element
-    // Otherwise it doesn't render even the size is changed
-    // because it is still a same reference...
-    // this.state.items.push(this.state.todoText)
-    // this.setState({ items: this.state.items})
-    // Copy and refere diffent array
-    this.setState({
-      todoText: '',
-      items: [...this.state.items, this.state.todoText],
-    })
+  // Override
+  async componentDidMount() {
+    console.log('mounted!')
+    try {
+      // get Items from SecureStore
+      const list = await SecureStore.getItemAsync('list')
+      if (list !== null && list !== undefined) {
+        this.setState({ items: JSON.parse(list) })
+      }
+    } catch (error) {
+      // Error handling
+    }
+  }
+  _insert = async () => {
+    try {
+      await this.setState({
+        todoText: '',
+        items: [...this.state.items, this.state.todoText],
+      })
+      await SecureStore.setItemAsync('list', JSON.stringify(this.state.items))
+    } catch (error) {
+      // Error handling
+    }
   }
 
-  _delete = (todoText: string) => {
+  _delete = async (todoText: string) => {
     // delete
     const index = (this.state.items as string[]).indexOf(todoText)
     this.state.items.splice(index, 1) /* remove */
-    this.setState({ items: [...this.state.items] })
+    try {
+      await this.setState({ items: [...this.state.items] })
+      await SecureStore.setItemAsync('list', JSON.stringify(this.state.items))
+    } catch (error) {
+      // Error handling
+    }
   }
+
+  // _insert = () => {
+  //   // insert item
+  //   // Pass new array to add element
+  //   // Otherwise it doesn't render even the size is changed
+  //   // because it is still a same reference...
+  //   // this.state.items.push(this.state.todoText)
+  //   // this.setState({ items: this.state.items})
+  //   // Copy and refere diffent array
+  //   this.setState({
+  //     todoText: '',
+  //     items: [...this.state.items, this.state.todoText],
+  //   })
+  // }
+
+  // _delete = (todoText: string) => {
+  //   // delete
+  //   const index = (this.state.items as string[]).indexOf(todoText)
+  //   this.state.items.splice(index, 1) /* remove */
+  //   this.setState({ items: [...this.state.items] })
+  // }
 
   // How each cell looks like
   _listItemRender = (item: string) => {
