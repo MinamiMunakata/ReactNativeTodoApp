@@ -7,7 +7,9 @@ import {
   TextInput,
   Button,
   FlatList,
+  TouchableOpacity,
 } from 'react-native'
+import { SecureStore } from 'expo'
 
 // Declare because of using typescript.
 interface IState {
@@ -35,12 +37,22 @@ export default class App extends React.Component<{}, IState> {
     })
   }
 
+  _delete = (todoText: string) => {
+    // delete
+    const index = (this.state.items as string[]).indexOf(todoText)
+    this.state.items.splice(index, 1) /* remove */
+    this.setState({ items: [...this.state.items] })
+  }
+
   // How each cell looks like
   _listItemRender = (item: string) => {
     return (
-      <View style={styles.listItem}>
-        <Text style={styles.itemText}>{item}</Text>
-      </View>
+      // this._delete(item) <- NG
+      <TouchableOpacity onPress={() => this._delete(item)}>
+        <View style={styles.listItem}>
+          <Text style={styles.itemText}>{item}</Text>
+        </View>
+      </TouchableOpacity>
     )
   }
   render() {

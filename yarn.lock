@@ -570,7 +570,16 @@
     pouchdb-collections "^1.0.1"
     tiny-queue "^0.2.1"
 
-"@types/fbemitter@^2.0.32":
+"@types/expo@^31.0.1":
+  version "31.0.1"
+  resolved "https://registry.yarnpkg.com/@types/expo/-/expo-31.0.1.tgz#1e68ee368f8f04ee5abf42c3990d1ae1cea15c33"
+  integrity sha512-HS/QWaFetU04kqV7khZjzV/RplPVngriFnrv2n8iNZ1cjSLkLYkHRbCh1hmLxUCOqmBjgtOIY67D3OJwVJLYEg==
+  dependencies:
+    "@types/fbemitter" "*"
+    "@types/react" "*"
+    "@types/react-native" "*"
+
+"@types/fbemitter@*", "@types/fbemitter@^2.0.32":
   version "2.0.32"
   resolved "http://registry.npmjs.org/@types/fbemitter/-/fbemitter-2.0.32.tgz#8ed204da0f54e9c8eaec31b1eec91e25132d082c"
 
@@ -596,7 +605,7 @@
   version "6.5.1"
   resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.5.1.tgz#a38f69c62528d56ba7bd1f91335a8004988d72f7"
 
-"@types/react-native@^0.57.18":
+"@types/react-native@*", "@types/react-native@^0.57.18":
   version "0.57.18"
   resolved "https://registry.yarnpkg.com/@types/react-native/-/react-native-0.57.18.tgz#f9c18fc59a3d038ed1f9414b84a8d9ba7078fc45"
   dependencies:
