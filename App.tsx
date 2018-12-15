@@ -9,7 +9,7 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native'
-import { SecureStore, SQLite } from 'expo'
+import { SecureStore, SQLite, FileSystem } from 'expo'
 
 const db = SQLite.openDatabase('todo.db')
 
@@ -32,43 +32,121 @@ export default class App extends React.Component<{}, IState> {
     items: [],
   }
 
-  // Override
-  async componentDidMount() {
-    console.log('mounted!')
-    try {
-      // get Items from SecureStore
-      const list = await SecureStore.getItemAsync('list')
-      if (list !== null && list !== undefined) {
-        this.setState({ items: JSON.parse(list) })
-      }
-    } catch (error) {
-      // Error handling
-    }
+  _read = () => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM todos',
+        [],
+        (_, { rows }) => {
+          const result = rows._array
+          for (const todoObject of result) {
+            const todo: string = todoObject.todo
+            this.setState({
+              items: [...this.state.items, todo],
+            })
+          }
+          console.log('<_read> Success: ' + JSON.stringify(result))
+        },
+        (_, error) => {
+          console.log('Error: ' + JSON.stringify(error))
+        }
+      )
+    })
   }
-  _insert = async () => {
-    try {
-      await this.setState({
-        todoText: '',
-        items: [...this.state.items, this.state.todoText],
-      })
-      await SecureStore.setItemAsync('list', JSON.stringify(this.state.items))
-    } catch (error) {
-      // Error handling
-    }
+  // Override
+  componentDidMount() {
+    db.transaction(
+      tx => {
+        tx.executeSql('CREATE TABLE IF NOT EXISTS todos (todo text)')
+      },
+      null,
+      this._read
+    )
+
+    // try {
+    //   // get Items from SecureStore
+    //   const list = await SecureStore.getItemAsync('list')
+    //   if (list !== null && list !== undefined) {
+    //     this.setState({ items: JSON.parse(list) })
+    //   }
+    // } catch (error) {
+    //   // Error handling
+    // }
   }
 
-  _delete = async (todoText: string) => {
-    // delete
+  _insert = (todoText: string) => {
+    this.setState({
+      todoText: '',
+      items: [...this.state.items, this.state.todoText],
+    })
+    db.transaction(
+      tx => {
+        tx.executeSql(
+          'INSERT INTO todos (todo) VALUES (?)',
+          [todoText],
+          (_, { rows }) => {
+            const result = rows.item()
+            console.log('Success: ' + JSON.stringify(rows))
+          },
+          (_, error) => {
+            console.log('Error: ' + JSON.stringify(error))
+          }
+        )
+      },
+      null,
+      console.log('_insert: Done.')
+    )
+  }
+
+  _delete = (todoText: string) => {
     const index = (this.state.items as string[]).indexOf(todoText)
     this.state.items.splice(index, 1) /* remove */
-    try {
-      await this.setState({ items: [...this.state.items] })
-      await SecureStore.setItemAsync('list', JSON.stringify(this.state.items))
-    } catch (error) {
-      // Error handling
-    }
+    this.setState({ items: [...this.state.items] })
+    db.transaction(
+      tx => {
+        tx.executeSql(
+          'DELETE FROM todos WHERE todo = ?',
+          [todoText],
+          (_, { rows }) => {
+            const result = rows._array
+            console.log('<_delete> Success: ' + JSON.stringify(result))
+          },
+          (_, error) => {
+            console.log('Error: ' + JSON.stringify(error))
+          }
+        )
+      },
+      null,
+      console.log('_delete: Done.')
+    )
   }
+  // --------------------- 2 (using SecureStore) ---------------------
+  // _insert = async () => {
+  //   try {
+  //     await this.setState({
+  //       todoText: '',
+  //       items: [...this.state.items, this.state.todoText],
+  //     })
+  //     await SecureStore.setItemAsync('list', JSON.stringify(this.state.items))
+  //   } catch (error) {
+  //     // Error handling
+  //   }
+  // }
 
+  // _delete = async (todoText: string) => {
+  //   // delete
+  //   const index = (this.state.items as string[]).indexOf(todoText)
+  //   this.state.items.splice(index, 1) /* remove */
+  //   try {
+  //     await this.setState({ items: [...this.state.items] })
+  //     await SecureStore.setItemAsync('list', JSON.stringify(this.state.items))
+  //   } catch (error) {
+  //     // Error handling
+  //   }
+  // }
+  // --------------------- 2 ---------------------
+
+  // --------------------- 1 (without database) ---------------------
   // _insert = () => {
   //   // insert item
   //   // Pass new array to add element
@@ -89,6 +167,7 @@ export default class App extends React.Component<{}, IState> {
   //   this.state.items.splice(index, 1) /* remove */
   //   this.setState({ items: [...this.state.items] })
   // }
+  // --------------------- 1 ---------------------
 
   // How each cell looks like
   _listItemRender = (item: string) => {
@@ -125,7 +204,10 @@ export default class App extends React.Component<{}, IState> {
             /* If the item is an object which has 'id' field, you can set 'id' as a key. */
           } /* item.id.toString() */
         />
-        <Button title={'Add Todo'} onPress={this._insert} />
+        <Button
+          title={'Add Todo'}
+          onPress={() => this._insert(this.state.todoText)}
+        />
       </SafeAreaView>
     )
   }
